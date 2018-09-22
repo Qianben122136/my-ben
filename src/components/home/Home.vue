@@ -35,16 +35,16 @@
           <el-submenu index="2">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>权限管理</span>
             </template>
 
-            <el-menu-item index="2-2">
+            <el-menu-item index="/home/rloes">
               <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
+              <span slot="title">角色列表</span>
             </el-menu-item>
-            <el-menu-item index="2-3">
+            <el-menu-item index="/home/rights">
               <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
+              <span slot="title">权限列表</span>
             </el-menu-item>
           </el-submenu>
 
@@ -67,9 +67,25 @@ export default {
       console.log(key, keyPath)
     },
     loginOut() {
-      console.log(111)
-      localStorage.removeItem('token')
-      this.$router.push('/login')
+      this.$confirm('是否要退出, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '退出账号成功!'
+          })
+          localStorage.removeItem('token')
+          this.$router.push('/login')
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消退出'
+          })
+        })
     }
   }
 }

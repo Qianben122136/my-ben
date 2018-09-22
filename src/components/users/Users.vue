@@ -1,11 +1,10 @@
 <template>
   <div>
     <div>
-      <el-breadcrumb separator-class="el-icon-arrow-right">
+      <el-breadcrumb separator-class="el-icon-arrow-right" class="index-breadcrumb">
         <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-        <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-        <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+        <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+        <el-breadcrumb-item>用户列表</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <el-row :gutter="20">
@@ -118,7 +117,6 @@ export default {
         .then(res => {
           const { data, meta } = res.data
           if (meta.status === 200) {
-            console.log(data)
             this.total = data.total
             this.tableData = data.users
           }
@@ -152,7 +150,6 @@ export default {
       this.$refs[formName].validate(valid => {
         if (valid) {
           this.$axios.post('/users', this.addForm).then(res => {
-            console.log(res)
             const { meta } = res.data
             if (meta.status === 201) {
               // 关闭模态框
@@ -170,17 +167,20 @@ export default {
     editSubmitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          const id = this.editForm.id
+          const { id, email, mobile } = this.editForm
           this.$axios
             .put(`/users/${id}`, {
-              email: this.editForm.email,
-              mobile: this.editForm.mobile
+              email,
+              mobile
             })
             .then(res => {
-              console.log(res)
-              const { meta } = res.data
+              const { data, meta } = res.data
               if (meta.status === 200) {
                 this.editUserDialog = false
+                // 这里要更新刚刚更改的数据
+                const editItem = this.tableData.find(item => item.id === id)
+                editItem.email = data.email
+                editItem.mobile = data.mobile
               }
             })
         } else {
@@ -200,7 +200,6 @@ export default {
     editFormById(id) {
       this.editUserDialog = true
       this.$axios.get(`users/${id}`).then(res => {
-        console.log(res)
         const { data, meta } = res.data
         if (meta.status === 200) {
           this.editForm = {
@@ -219,9 +218,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          console.log(id)
           this.$axios.delete(`users/${id}`).then(res => {
-            console.log(res)
             if (res.data.meta.status === 200) {
               // 删除之后 需要删除掉对应列表的数据
               const index = this.tableData.findIndex(item => item.id === id)
@@ -305,5 +302,11 @@ export default {
 <style>
 .btn-success {
   padding-top: 15px;
+}
+.index-breadcrumb {
+  line-height: 40px;
+  background-color: #d4dae0;
+  font-size: 16px;
+  padding-left: 10px;
 }
 </style>
