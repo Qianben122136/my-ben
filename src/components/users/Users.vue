@@ -80,7 +80,7 @@
         <el-form-item label="用户名" prop='username' label-width="90px">
           <el-input v-model="editForm.username" disabled autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="手机号" label-width="90px" prop='moblie'>
+        <el-form-item label="手机号" label-width="90px" prop='mobile'>
           <el-input v-model="editForm.mobile" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" label-width="90px" prop='email'>
@@ -223,6 +223,7 @@ export default {
           this.$axios.delete(`users/${id}`).then(res => {
             console.log(res)
             if (res.data.meta.status === 200) {
+              // 删除之后 需要删除掉对应列表的数据
               const index = this.tableData.findIndex(item => item.id === id)
 
               this.tableData.splice(index, 1)
@@ -276,12 +277,24 @@ export default {
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' },
+          {
+            pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/,
+            message: '请输入正确的手机格式',
+            trigger: 'blur'
+          }
         ]
       },
       editRules: {
-        username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+        mobile: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' },
+          {
+            pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/,
+            message: '请输入正确的手机格式',
+            trigger: 'change'
+          }
         ]
       }
     }
