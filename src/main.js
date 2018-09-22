@@ -30,7 +30,7 @@ axios.interceptors.response.use(
       router.push('/login')
       localStorage.removeItem('token')
     }
-    // Do something with response data
+    // 在响应之前做的事情
     return response
   },
   function(error) {
