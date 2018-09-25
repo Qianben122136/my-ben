@@ -40,14 +40,14 @@
           <template slot-scope="scope">
             <el-button type="primary" plain icon="el-icon-edit" size='mini' @click='editFormById(scope.row.id)'></el-button>
             <el-button type="danger" plain icon="el-icon-delete" size='mini' @click="delUserList(scope.row.id)"></el-button>
-            <el-button type="success" size='mini' plain>分配角色</el-button>
+            <el-button type="success" size='mini' plain @click="userRoles(scope.row)">分配角色</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-row>
     <!-- 分页插件 -->
     <el-row justify="start">
-      <el-col :span="8" align="left">
+      <el-col :span="8">
         <el-pagination :current-page.sync="curPage" :page-size="pageSize" background layout="prev, pager, next" :total="total" @current-change="changePage">
         </el-pagination>
       </el-col>
@@ -73,7 +73,9 @@
         <el-button type="primary" @click="submitForm('addForm')">确 定</el-button>
       </div>
     </el-dialog>
-    <!-- 修改用户信息的模态框 -->
+    <!--
+      修改用户信息的模态框
+     -->
     <el-dialog align='left' title="编辑用户" :visible.sync="editUserDialog" width='50%' @close='closeEditDialog'>
       <el-form :model="editForm" :rules="editRules" ref="editForm">
         <el-form-item label="用户名" prop='username' label-width="90px">
@@ -91,7 +93,26 @@
         <el-button type="primary" @click="editSubmitForm('editForm')">确 定</el-button>
       </div>
     </el-dialog>
+    <!--
+      分配角色的模态框
+      -->
+    <el-dialog title="分配角色" :visible.sync="rolesDialogVisible">
+      <el-form :model="userRolesForm">
+        <el-form-item label="用户名" label-width="120px">
+          <el-input v-model="userRolesForm.username" disabled autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色列表" label-width="120px">
+          <el-select v-model="userRolesForm.rid" placeholder="请选择活动区域">
 
+            <el-option :label="item.roleName" :value="item.id" v-for="item in rolesListData" :key="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="rolesDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="userRolesConfim">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -101,6 +122,14 @@ export default {
     this.getdata()
   },
   methods: {
+    async getRolesListData(callback) {
+      const res = await this.$axios.get(`/roles`)
+      const { data, meta } = res.data
+      if (meta.status === 200) {
+        this.rolesListData = data
+        callback()
+      }
+    },
     getdata(curPage = 1) {
       this.$axios
         .get('/users', {
@@ -243,10 +272,43 @@ export default {
             message: '已取消删除'
           })
         })
+    },
+    userRoles(curRoles) {
+      // 这是查询数据的方法
+      this.getRolesListData(() => {
+        this.userRolesForm.username = curRoles.username
+        this.userRolesForm.id = curRoles.id
+        this.$axios.get(`/users/${curRoles.id}`).then(res => {
+          const { data, meta } = res.data
+          if (meta.status === 200) {
+            // 这里要把默认值给选项
+            this.userRolesForm.rid = data.rid === -1 ? '请选择角色' : data.rid
+          }
+        })
+      })
+
+      this.rolesDialogVisible = true
+    },
+    async userRolesConfim() {
+      const res = await this.$axios.put(
+        `/users/${this.userRolesForm.id}/role`,
+        {
+          rid: this.userRolesForm.rid
+        }
+      )
+      const meta = res.data.meta
+      if (meta.status === 200) {
+        this.rolesDialogVisible = false
+        this.$message({
+          type: 'success',
+          message: '分配角色成功'
+        })
+      }
     }
   },
   data() {
     return {
+      rolesListData: [],
       total: 0,
       searchinput: '',
       pageSize: 3,
@@ -254,6 +316,12 @@ export default {
       tableData: [],
       addUserDialog: false,
       editUserDialog: false,
+      rolesDialogVisible: false,
+      userRolesForm: {
+        name: '',
+        rid: -1,
+        id: -1
+      },
       addForm: {
         username: '',
         password: '',

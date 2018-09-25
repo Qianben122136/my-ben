@@ -1,0 +1,56 @@
+<div>
+  <el-row>
+    <el-col>
+      <el-button @click="addCategories" type="success" plain>添加分类</el-button>
+    </el-col>
+  </el-row>
+  <el-table v-loading="loading" :data="categoriesData" stripe style="width: 100%">
+    <!-- index-size 就是缩进的属性 只是数字类型的 -->
+    <el-table-tree-column :indent-size="26" parent-key="cat_pid" child-key="children" level-key="cat_level" tree-key="cat_id"
+      file-icon="icon icon-file" folder-icon="icon icon-folder" prop="cat_name" label="分类名称" width="180"></el-table-tree-column>
+
+    <el-table-column prop="cat_deleted" label="是否有效" width="180">
+      <template slot-scope="scope">
+        <span v-if="scope.row.cat_deleted">无效</span>
+        <span v-else>有效</span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="cat_level" label="菜单级别">
+      <template slot-scope="scope">
+        <span v-if="scope.row.cat_level === 0">一级</span>
+        <span v-else-if="scope.row.cat_level === 1">二级</span>
+        <span v-else>三级</span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="operation" label="操作">
+      <template slot-scope="scope">
+        <el-button type="primary" plain icon="el-icon-edit" size='mini' @click=''></el-button>
+        <el-button type="danger" plain icon="el-icon-delete" size='mini' @click=''></el-button>
+      </template>
+    </el-table-column>
+  </el-table>
+  <!-- 分页插件 -->
+  <el-row justify="start">
+    <el-col :span="8">
+      <el-pagination :current-page.sync="curPage" :page-size="pageSize" background layout="prev, pager, next" :total="total" @current-change="changePage">
+      </el-pagination>
+    </el-col>
+  </el-row>
+  <!-- 添加分类弹窗 -->
+  <el-dialog title="收货地址" :visible.sync="dialogFormAddCategories">
+    <el-form :model="AddCategoriesForm">
+      <el-form-item label="分类名称" label-width="120px">
+        <el-input v-model="AddCategoriesForm.cat_name" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="父级名称" label-width="120px">
+        <el-cascader :change-on-select="true" :options="AddCategoriesForm.categoriesOptions" v-model="AddCategoriesForm.selectedOptions"
+          @change="handleChange" :props="defaultPorps">
+        </el-cascader>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogFormAddCategories = false">取 消</el-button>
+      <el-button type="primary" @click="dialogCloseCategories">确 定</el-button>
+    </div>
+  </el-dialog>
+</div>

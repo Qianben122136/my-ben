@@ -5,17 +5,20 @@ import Home from '@/components/home/Home'
 import Users from '@/components/users/Users'
 import Rights from '@/components/rights/Rights'
 import Roles from '@/components/roles/Roles'
+import Categories from '@/components/categories/Categories'
 Vue.use(Router)
 
 const router = new Router({
   routes: [
+    { path: '/', redirect: Home },
     {
       path: '/home',
       component: Home,
       children: [
-        { path: 'users', component: Users },
-        { path: 'rights', component: Rights },
-        { path: 'roles', component: Roles }
+        { path: '/users', component: Users },
+        { path: '/rights', component: Rights },
+        { path: '/roles', component: Roles },
+        { path: '/categories', component: Categories }
       ]
     },
     { path: '/login', component: Login }

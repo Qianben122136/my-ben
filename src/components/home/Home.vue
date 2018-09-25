@@ -16,31 +16,16 @@
     </el-header>
     <el-container>
       <el-aside width="200px">
-        <el-menu :router="true" default-active="1-2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
-          <el-submenu index="1">
+        <el-menu :router="true" :default-active="$route.path.slice(1)" :unique-opened="true" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
+          <el-submenu :index="menu1.id+''" v-for="menu1 in meunsList" :key="menu1.id">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{menu1.authName}}</span>
             </template>
 
-            <el-menu-item index="/home/users">
+            <el-menu-item :index="'/'+menu2.path" v-for="menu2 in menu1.children" :key="menu2.id">
               <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-
-            <el-menu-item index="/home/roles">
-              <i class="el-icon-menu"></i>
-              <span slot="title">角色列表</span>
-            </el-menu-item>
-            <el-menu-item index="/home/rights">
-              <i class="el-icon-menu"></i>
-              <span slot="title">权限列表</span>
+              <span slot="title">{{menu2.authName}}</span>
             </el-menu-item>
           </el-submenu>
 
@@ -55,7 +40,22 @@
 
 <script>
 export default {
+  created() {
+    this.getMenuslistData()
+  },
+  data() {
+    return {
+      meunsList: []
+    }
+  },
   methods: {
+    async getMenuslistData() {
+      const res = await this.$axios.get(`/menus`)
+      const { data, meta } = res.data
+      if (meta.status === 200) {
+        this.meunsList = data
+      }
+    },
     handleOpen(key, keyPath) {
       console.log(key, keyPath)
     },
@@ -63,6 +63,7 @@ export default {
       console.log(key, keyPath)
     },
     loginOut() {
+      console.log(111)
       this.$confirm('是否要退出, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -122,7 +123,7 @@ export default {
 }
 
 .el-aside {
-  background-color: #d3dce6;
+  background-color: #545c64;
   color: #333;
   line-height: 200px;
 }
